@@ -1,0 +1,33 @@
+@GraphQLApi_HostAddress = http://localhost:5145
+@ClientId = graphql-client
+@ClientSecret = graphql-secret
+
+### Query simple
+POST {{GraphQLApi_HostAddress}}/graphql
+Content-Type: application/json
+X-Client-Id: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+{
+  "query": "query { categories { id nom description } }"
+}
+
+### Query avec pagination, filtrage et tri
+POST {{GraphQLApi_HostAddress}}/graphql
+Content-Type: application/json
+X-Client-Id: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+{
+  "query": "query { produitsPage(search: \"Laptop\", minPrix: 500, sortBy: PRIX, sortDirection: DESC, skip: 0, take: 5) { totalCount skip take hasNextPage hasPreviousPage items { id nom prix stock categorie { nom } } } }"
+}
+
+### Mutation
+POST {{GraphQLApi_HostAddress}}/graphql
+Content-Type: application/json
+X-Client-Id: {{ClientId}}
+X-Client-Secret: {{ClientSecret}}
+
+{
+  "query": "mutation { createCategorie(nom: \"Maison\", description: \"Produits pour la maison\") { id nom description } }"
+}

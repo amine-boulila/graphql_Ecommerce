@@ -1,0 +1,305 @@
+query {
+  categories {
+    id
+    nom
+    description
+    createdAt
+    produits {
+      id
+      nom
+      prix
+      stock
+    }
+  }
+}
+
+query {
+  produits {
+    id
+    nom
+    description
+    prix
+    stock
+    categorie {
+      id
+      nom
+    }
+    avis {
+      id
+      note
+      titre
+      utilisateur {
+        id
+        nom
+        prenom
+      }
+    }
+  }
+}
+
+query {
+  utilisateurs {
+    id
+    nom
+    prenom
+    email
+    telephone
+    adresse {
+      rue
+      codePostal
+      ville
+      pays
+    }
+    commandes {
+      id
+      numero
+      statut
+      montantTotal
+      lignes {
+        quantite
+        prixUnitaire
+        sousTotal
+        produit {
+          nom
+        }
+      }
+    }
+    avis {
+      id
+      note
+      titre
+      produit {
+        nom
+      }
+    }
+  }
+}
+
+query {
+  produitsPage(
+    search: "Laptop"
+    minPrix: 500
+    maxPrix: 2000
+    sortBy: PRIX
+    sortDirection: DESC
+    skip: 0
+    take: 5
+  ) {
+    totalCount
+    skip
+    take
+    hasNextPage
+    hasPreviousPage
+    items {
+      id
+      nom
+      prix
+      stock
+      categorie {
+        nom
+      }
+    }
+  }
+}
+
+query {
+  commandes {
+    id
+    numero
+    statut
+    montantTotal
+    dateCommande
+    dateLivraison
+    utilisateur {
+      id
+      nom
+      prenom
+    }
+    lignes {
+      produitId
+      quantite
+      prixUnitaire
+      sousTotal
+      produit {
+        id
+        nom
+        prix
+      }
+    }
+  }
+}
+
+query {
+  avis {
+    comment
+    createdAt
+    id
+    note
+    produitId
+    titre
+    utilisateurId
+  }
+}
+
+mutation {
+  createCategorie(
+    nom: "Maison"
+    description: "Produits pour la maison"
+  ) {
+    id
+    nom
+    description
+    createdAt
+  }
+}
+
+mutation {
+  createUtilisateur(
+    nom: "Demo"
+    prenom: "Etudiant"
+    email: "demo.validation@fac.test"
+    telephone: "0600000000"
+  ) {
+    id
+    nom
+    prenom
+    email
+    telephone
+    createdAt
+  }
+}
+
+mutation {
+  createProduit(
+    nom: "Chaise de bureau"
+    description: "Chaise confortable pour le travail"
+    prix: 199.99
+    stock: 12
+    categorieId: "REMPLACE_PAR_CATEGORIE_ID"
+    image: "https://via.placeholder.com/300"
+  ) {
+    id
+    nom
+    prix
+    stock
+    categorie {
+      id
+      nom
+    }
+  }
+}
+
+mutation {
+  updateProduit(
+    id: "REMPLACE_PAR_PRODUIT_ID"
+    prix: 149.99
+    stock: 20
+  ) {
+    id
+    nom
+    prix
+    stock
+    updatedAt
+    categorie {
+      nom
+    }
+  }
+}
+
+mutation {
+  createAvis(
+    produitId: "REMPLACE_PAR_PRODUIT_ID"
+    utilisateurId: "REMPLACE_PAR_UTILISATEUR_ID"
+    note: 5
+    titre: "Excellent"
+    comment: "Tres bon produit pour la demonstration"
+  ) {
+    id
+    note
+    titre
+    comment
+    produit {
+      nom
+    }
+    utilisateur {
+      nom
+      prenom
+    }
+  }
+}
+
+mutation {
+  createCommande(
+    utilisateurId: "REMPLACE_PAR_UTILISATEUR_ID"
+    lignes: [
+      {
+        produitId: "REMPLACE_PAR_PRODUIT_ID"
+        quantite: 2
+        prixUnitaire: 1299.99
+      }
+    ]
+  ) {
+    id
+    numero
+    statut
+    montantTotal
+    utilisateur {
+      nom
+      prenom
+    }
+    lignes {
+      quantite
+      prixUnitaire
+      sousTotal
+      produit {
+        nom
+      }
+    }
+  }
+}
+
+mutation {
+  updateCommandeStatut(
+    id: "REMPLACE_PAR_COMMANDE_ID"
+    statut: "Livrée"
+  ) {
+    id
+    numero
+    statut
+    dateLivraison
+    utilisateur {
+      nom
+      prenom
+    }
+  }
+}
+
+subscription {
+  onCommandeCreated {
+    id
+    numero
+    statut
+    montantTotal
+    utilisateur {
+      nom
+      prenom
+    }
+  }
+}
+
+subscription {
+  onCommandeUpdated {
+    id
+    numero
+    statut
+    dateLivraison
+  }
+}
+
+subscription {
+  onCommandeDeleted {
+    id
+    numero
+    statut
+  }
+}
