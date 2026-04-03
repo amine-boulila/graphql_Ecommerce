@@ -1,4 +1,5 @@
 using GraphQLApi.Models;
+using HotChocolate;
 
 namespace GraphQLApi.Types;
 
@@ -10,6 +11,7 @@ public class CategorieType
     public DateTime CreatedAt { get; set; }
 
     // Relations
+    [GraphQLIgnore]
     public List<ProduitType> Produits { get; set; } = new();
 
     public static CategorieType FromModel(Categorie cat) => new()
@@ -34,8 +36,11 @@ public class ProduitType
     public DateTime UpdatedAt { get; set; }
 
     // Relations
+    [GraphQLIgnore]
     public CategorieType? Categorie { get; set; }
+    [GraphQLIgnore]
     public List<AvisType> Avis { get; set; } = new();
+    [GraphQLIgnore]
     public List<CommandeType> Commandes { get; set; } = new();
 
     public static ProduitType FromModel(Produit prod) => new()
@@ -87,7 +92,9 @@ public class UtilisateurType
     public DateTime CreatedAt { get; set; }
 
     // Relations
+    [GraphQLIgnore]
     public List<CommandeType> Commandes { get; set; } = new();
+    [GraphQLIgnore]
     public List<AvisType> Avis { get; set; } = new();
 
     public static UtilisateurType FromModel(Utilisateur user) => new()
@@ -129,7 +136,9 @@ public class AvisType
     public DateTime CreatedAt { get; set; }
 
     // Relation
+    [GraphQLIgnore]
     public ProduitType? Produit { get; set; }
+    [GraphQLIgnore]
     public UtilisateurType? Utilisateur { get; set; }
 
     public static AvisType FromModel(Avis avis) => new()
@@ -156,6 +165,7 @@ public class CommandeType
     public DateTime? DateLivraison { get; set; }
 
     // Relation
+    [GraphQLIgnore]
     public UtilisateurType? Utilisateur { get; set; }
 
     public static CommandeType FromModel(Commande cmd) => new()
@@ -179,6 +189,7 @@ public class LigneCommandeType
     public decimal SousTotal { get; set; }
 
     // Relation
+    [GraphQLIgnore]
     public ProduitType? Produit { get; set; }
 
     public static LigneCommandeType FromModel(LigneCommande ligne) => new()

@@ -1,6 +1,8 @@
 using GraphQLApi.Data;
+using GraphQLApi.DataLoaders;
 using GraphQLApi.GraphQL;
 using GraphQLApi.Middleware;
+using GraphQLApi.Resolvers;
 using GraphQLApi.Services;
 using DotNetEnv;
 
@@ -30,6 +32,15 @@ var clientSecret = Environment.GetEnvironmentVariable("GRAPHQL_CLIENT_SECRET")
 // Create one MongoDB context instance and share it through dependency injection.
 var mongoContext = new MongoDbContext(connectionString, databaseName);
 
+builder.Services.AddScoped<CategorieByIdDataLoader>();
+builder.Services.AddScoped<ProduitByIdDataLoader>();
+builder.Services.AddScoped<UtilisateurByIdDataLoader>();
+builder.Services.AddScoped<ProduitsByCategorieIdDataLoader>();
+builder.Services.AddScoped<AvisByProduitIdDataLoader>();
+builder.Services.AddScoped<AvisByUtilisateurIdDataLoader>();
+builder.Services.AddScoped<CommandesByProduitIdDataLoader>();
+builder.Services.AddScoped<CommandesByUtilisateurIdDataLoader>();
+
 // Register the GraphQL root types and enable in-memory pub/sub for subscriptions.
 builder.Services
     .AddSingleton(mongoContext)
@@ -37,6 +48,12 @@ builder.Services
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddSubscriptionType<Subscription>()
+    .AddTypeExtension<CategorieResolvers>()
+    .AddTypeExtension<ProduitResolvers>()
+    .AddTypeExtension<UtilisateurResolvers>()
+    .AddTypeExtension<AvisResolvers>()
+    .AddTypeExtension<CommandeResolvers>()
+    .AddTypeExtension<LigneCommandeResolvers>()
     .AddInMemorySubscriptions();
 
 var app = builder.Build();

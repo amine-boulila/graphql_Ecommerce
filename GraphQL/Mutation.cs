@@ -46,10 +46,7 @@ public class Mutation
             Image = image
         };
         await context.Produits.InsertOneAsync(produit);
-        var produitType = ProduitType.FromModel(produit);
-        var categorie = await context.Categories.Find(c => c.Id == produit.CategorieId).FirstOrDefaultAsync();
-        produitType.Categorie = categorie != null ? CategorieType.FromModel(categorie) : null;
-        return produitType;
+        return ProduitType.FromModel(produit);
     }
 
     public async Task<ProduitType?> UpdateProduit(
@@ -83,10 +80,7 @@ public class Mutation
             result.Stock = stock.Value;
         result.UpdatedAt = DateTime.UtcNow;
 
-        var produitType = ProduitType.FromModel(result);
-        var categorie = await context.Categories.Find(c => c.Id == result.CategorieId).FirstOrDefaultAsync();
-        produitType.Categorie = categorie != null ? CategorieType.FromModel(categorie) : null;
-        return produitType;
+        return ProduitType.FromModel(result);
     }
 
     public async Task<bool> DeleteProduit(string id, MongoDbContext context)
@@ -152,7 +146,7 @@ public class Mutation
         };
 
         await context.Commandes.InsertOneAsync(commande);
-        var commandeType = await EnrichCommandeAsync(CommandeType.FromModel(commande), context);
+        var commandeType = CommandeType.FromModel(commande);
         await eventSender.SendAsync(CommandeSubscriptionTopics.CommandeCreated, commandeType);
         return commandeType;
     }
@@ -176,7 +170,7 @@ public class Mutation
         result.Statut = statut;
         result.DateLivraison = statut == "Livrée" ? DateTime.UtcNow : null;
 
-        var commandeType = await EnrichCommandeAsync(CommandeType.FromModel(result), context);
+        var commandeType = CommandeType.FromModel(result);
         await eventSender.SendAsync(CommandeSubscriptionTopics.CommandeUpdated, commandeType);
         return commandeType;
     }
@@ -212,63 +206,13 @@ public class Mutation
             Comment = comment
         };
         await context.Avis.InsertOneAsync(avis);
-        var avisType = AvisType.FromModel(avis);
-
-        var produit = await context.Produits.Find(p => p.Id == avis.ProduitId).FirstOrDefaultAsync();
-        if (produit != null)
-        {
-            avisType.Produit = ProduitType.FromModel(produit);
-        }
-
-        var utilisateur = await context.Utilisateurs.Find(u => u.Id == avis.UtilisateurId).FirstOrDefaultAsync();
-        if (utilisateur != null)
-        {
-            avisType.Utilisateur = UtilisateurType.FromModel(utilisateur);
-        }
-
-        return avisType;
+        return AvisType.FromModel(avis);
     }
 
     public async Task<bool> DeleteAvis(string id, MongoDbContext context)
     {
         var result = await context.Avis.DeleteOneAsync(a => a.Id == id);
         return result.DeletedCount > 0;
-    }
-
-    private static async Task<CommandeType> EnrichCommandeAsync(CommandeType commandeType, MongoDbContext context)
-    {
-        var utilisateur = await context.Utilisateurs
-            .Find(u => u.Id == commandeType.UtilisateurId)
-            .FirstOrDefaultAsync();
-
-        if (utilisateur != null)
-        {
-            commandeType.Utilisateur = UtilisateurType.FromModel(utilisateur);
-        }
-
-        var produitIds = commandeType.Lignes
-            .Select(l => l.ProduitId)
-            .Distinct()
-            .ToList();
-
-        if (produitIds.Count == 0)
-        {
-            return commandeType;
-        }
-
-        var produits = await context.Produits
-            .Find(p => produitIds.Contains(p.Id))
-            .ToListAsync();
-
-        var produitsById = produits.ToDictionary(p => p.Id, ProduitType.FromModel);
-
-        foreach (var ligne in commandeType.Lignes)
-        {
-            produitsById.TryGetValue(ligne.ProduitId, out var produit);
-            ligne.Produit = produit;
-        }
-
-        return commandeType;
     }
 }
 
