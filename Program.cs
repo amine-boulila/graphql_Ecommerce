@@ -32,6 +32,8 @@ var clientSecret = Environment.GetEnvironmentVariable("GRAPHQL_CLIENT_SECRET")
 // Create one MongoDB context instance and share it through dependency injection.
 var mongoContext = new MongoDbContext(connectionString, databaseName);
 
+// Register DataLoaders used by nested GraphQL resolvers to batch related MongoDB lookups
+// and reduce the N+1 query problem.
 builder.Services.AddScoped<CategorieByIdDataLoader>();
 builder.Services.AddScoped<ProduitByIdDataLoader>();
 builder.Services.AddScoped<UtilisateurByIdDataLoader>();
@@ -41,7 +43,8 @@ builder.Services.AddScoped<AvisByUtilisateurIdDataLoader>();
 builder.Services.AddScoped<CommandesByProduitIdDataLoader>();
 builder.Services.AddScoped<CommandesByUtilisateurIdDataLoader>();
 
-// Register the GraphQL root types and enable in-memory pub/sub for subscriptions.
+// Register the GraphQL root types, attach type extensions that resolve nested fields lazily,
+// and enable in-memory pub/sub for subscriptions.
 builder.Services
     .AddSingleton(mongoContext)
     .AddGraphQLServer()
